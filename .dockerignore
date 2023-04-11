@@ -1,0 +1,12 @@
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/__pycache__
+**/lista.csv
+**/charts
+**/helm
+**/docker-compose*
+**/Dockerfile*
+LICENSE
+Readme.md
