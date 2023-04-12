@@ -1,5 +1,4 @@
 import lichess.api
-import requests
 from telegram import Update
 from telegram.ext import ContextTypes
 from database import *
@@ -21,25 +20,16 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"User \"{lichess_username}\" doesn't exist, or Lichess is unavailable 🙃. Check if the username is correct and try again.")
         return
 
-    conn = users_db()
-    cursor = conn.cursor()
-
-    # Update the user's Lichess username in the database
-    cursor.execute(
-        "INSERT OR REPLACE INTO users (telegram_id, lichess_username) VALUES (?, ?)",
-        (telegram_id, lichess_username),
-    )
-    conn.commit()
+    register_query = f'INSERT OR REPLACE INTO users (telegram_id, lichess_username) VALUES ({telegram_id}, "{lichess_username}")'
+    database_update(register_query)
 
     # Send a confirmation message
     message = f"Your Lichess username has been set to {lichess_username}"
     await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    conn = users_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT lichess_username FROM users WHERE telegram_id = ?", (update.effective_chat.id,))
-    result = cursor.fetchone()
+    stats_query = f'SELECT lichess_username FROM users WHERE telegram_id = {update.effective_chat.id}'
+    result = database_fetchone(stats_query)
 
     if result is None:
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f'You haven\'t registered your Lichess username yet. Use the /register command to register it')
