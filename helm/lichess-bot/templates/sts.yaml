@@ -1,0 +1,86 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "lichess-bot.fullname" . }}
+  labels:
+    {{- include "lichess-bot.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+{{ include "lichess-bot.selectorLabels" . | indent 6 }}
+  serviceName: {{ include "lichess-bot.fullname" . }}
+  minReadySeconds: 10
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+{{ include "lichess-bot.selectorLabels" . | indent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "lichess-bot.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: 10
+      initContainers:
+      - name: init-permissions
+        image: busybox:latest
+        command: ['sh', '-c', 'chown -R 1000:1000 /app/data']
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        env:
+          - name: DB_PATH
+            value: "{{ .Values.db_path }}"
+          - name: TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "lichess-bot.fullname" . }}-secrets
+                key: telegram_token
+#        ports:
+#          - containerPort: 80
+#            name: http
+#        livenessProbe:
+#          httpGet:
+#            path: /time
+#            port: http
+#        readinessProbe:
+#          httpGet:
+#            path: /time
+#            port: http
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "do-block-storage"
+      resources:
+        requests:
+          storage: {{ .Values.data_volume_size }}
