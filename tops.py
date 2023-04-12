@@ -36,7 +36,7 @@ async def top_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     top_10 = sorted(ratings.items(), key=lambda x: x[1], reverse=True)[:10]
 
     # format the response message
-    response = ""
+    response = f"Top 10 players in {game_mode}:\n\n"
     for i, (lichess_username, rating) in enumerate(top_10):
         response += f"{i+1}. {lichess_username}: {rating}\n"
 
