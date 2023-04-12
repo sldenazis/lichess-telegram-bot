@@ -38,10 +38,11 @@ async def top_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # format the response message
     response = f"Top 10 players in {game_mode}:\n\n"
     for i, (lichess_username, rating) in enumerate(top_10):
-        response += f"{i+1}. {lichess_username}: {rating}\n"
+        lichess_user = lichess.api.user(lichess_username)
+        response += f"{i+1}\. [{lichess_username}]({lichess_user['url']}): {rating}\n"
 
     if response == "":
         await context.bot.send_message(chat_id=update.effective_chat.id, text='No ratings found for the specified game mode.')
     else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=response)
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=response, parse_mode='MarkdownV2', disable_web_page_preview=True)
 
