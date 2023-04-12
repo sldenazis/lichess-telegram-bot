@@ -5,7 +5,8 @@ from database import *
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get the Telegram user ID and the Lichess username from the message
-    telegram_id = update.effective_chat.id
+    telegram_id = update.effective_user.id
+
     try:
         lichess_username = context.args[0]
     except Exception as error:
@@ -28,7 +29,12 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    stats_query = f'SELECT lichess_username FROM users WHERE telegram_id = {update.effective_chat.id}'
+    telegram_id = update.effective_user.id
+
+    if update.message.reply_to_message:
+        telegram_id = update.message.reply_to_message.from_user.id
+
+    stats_query = f'SELECT lichess_username FROM users WHERE telegram_id = {telegram_id}'
     result = database_fetchone(stats_query)
 
     if result is None:
