@@ -5,7 +5,7 @@ from database import *
 
 async def top_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # check if game mode is specified
-    game_mode = 'classical'
+    game_mode = 'blitz'
     if len(context.args) > 0:
         game_mode = context.args[0].lower()
 
@@ -24,9 +24,10 @@ async def top_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             if telegram_member.status not in ['left', 'kicked']:
                 lichess_user = lichess.api.user(lichess_username)
-                rating = lichess_user['perfs'][game_mode]['rating']
-                if rating is not None:
-                    ratings[lichess_username] = rating
+                if not 'prov' in lichess_user['perfs'][game_mode]:
+                    rating = lichess_user['perfs'][game_mode]['rating']
+                    if rating is not None:
+                        ratings[lichess_username] = rating
 
         except Exception as e:
             print(f"Failed to retrieve {game_mode} rating for user {lichess_username}: {e}")
