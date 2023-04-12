@@ -12,6 +12,7 @@ from database import *
 from activity import *
 from puzzles import *
 from users import *
+from tops import *
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,10 +28,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
 
-if __name__ == '__main__':
-    users_db()
+TOKEN = os.environ.get('TOKEN', 'changeme')
 
-    application = ApplicationBuilder().token(os.environ['TOKEN']).build()
+if __name__ == '__main__':
+    database_initialize()
+
+    application = ApplicationBuilder().token(TOKEN).build()
     
     start_handler = CommandHandler('start', start)
     application.add_handler(start_handler)
@@ -43,6 +46,9 @@ if __name__ == '__main__':
 
     stats_handler = CommandHandler('stats', stats)
     application.add_handler(stats_handler)
+
+    top_chat_handler = CommandHandler('top_chat', top_chat)
+    application.add_handler(top_chat_handler)
 
     puzzles_handler = CommandHandler('puzzle', puzzles)
     application.add_handler(puzzles_handler)

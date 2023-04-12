@@ -1,9 +1,8 @@
-import lichess.api
 import re
 import requests
 import json
 
-from telegram import Update, Bot
+from telegram import Update
 from telegram.ext import ContextTypes
 
 
@@ -11,7 +10,6 @@ async def puzzles(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = requests.get('https://lichess.org/api/puzzle/daily')
     game = response.json()
 
-    print(game)
     color = 'Black' if game['puzzle']['initialPly'] % 2 == 0 else 'White'
     url = f'https://lichess.org/training/{game["puzzle"]["id"]}'
     caption = f'{color} to move\n{url}'
