@@ -2,6 +2,7 @@ import lichess.api
 from telegram import Update
 from telegram.ext import ContextTypes
 from database import *
+from helpers import *
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get the Telegram user ID and the Lichess username from the message
@@ -47,8 +48,10 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lichess_user = lichess.api.user(lichess_username)
         perfs = lichess_user['perfs']
 
+        md_username = md_escape_chars(lichess_username)
+
         message = []
-        message.append(f"*Username:* [{lichess_username}]({lichess_user['url']})\n*Stats:*\n\n")
+        message.append(f"*Username:* [{md_username}]({lichess_user['url']})\n*Stats:*\n\n")
 
         for perf in perfs:
             if 'rating' in perfs[perf]:
