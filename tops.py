@@ -2,6 +2,7 @@ import lichess.api
 from telegram import Update
 from telegram.ext import ContextTypes
 from database import *
+from helpers import *
 
 async def top_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # check if game mode is specified
@@ -40,7 +41,8 @@ async def top_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = f"Top 10 players in {game_mode}:\n\n"
     for i, (lichess_username, rating) in enumerate(top_10):
         lichess_user = lichess.api.user(lichess_username)
-        response += f"{i+1}\. [{lichess_username}]({lichess_user['url']}): {rating}\n"
+        md_username = md_escape_chars(lichess_username)
+        response += f"{i+1}\. [{md_username}]({lichess_user['url']}): {rating}\n"
 
     if response == "":
         await context.bot.send_message(chat_id=update.effective_chat.id, text='No ratings found for the specified game mode.')
